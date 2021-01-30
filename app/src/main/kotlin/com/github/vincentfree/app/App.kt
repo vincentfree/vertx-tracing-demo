@@ -3,6 +3,8 @@
  */
 package com.github.vincentfree.app
 
+import com.github.vincentfree.util.ConsoleColors
+import com.github.vincentfree.verticles.CacheVerticle
 import com.github.vincentfree.verticles.RestVerticle
 import io.vertx.config.ConfigRetriever
 import io.vertx.core.Vertx
@@ -16,7 +18,8 @@ import kotlin.system.exitProcess
 
 private val logger = LogManager.getLogger("AppKt")
 fun main() = runBlocking<Unit> {
-    System.setProperty("JAEGER_SERVICE_NAME","appService")
+    System.setProperty("JAEGER_SERVICE_NAME", "appService")
+    System.setProperty("log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector")
 
     val vertxOptions = vertxOptionsOf(
         tracingOptions = OpenTracingOptions()
@@ -24,11 +27,19 @@ fun main() = runBlocking<Unit> {
     val vertx = Vertx.vertx(vertxOptions)
     val configRetriever = ConfigRetriever.create(vertx)
     val config = configRetriever.config.await()
-    val appId = kotlin.runCatching {
-        vertx.deployVerticle(RestVerticle(), deploymentOptionsOf(config = config)).await()
+    val appIds = kotlin.runCatching {
+        listOf(
+            "cache" to vertx.deployVerticle(CacheVerticle(), deploymentOptionsOf(config = config)).await(),
+            "rest" to vertx.deployVerticle(RestVerticle(), deploymentOptionsOf(config = config)).await(),
+        )
     }.getOrElse {
         logger.error("failed to start the application due to this error: ${it.message}")
         exitProcess(1)
     }
-    logger.info("Application started, ID:$appId")
+    appIds.forEach { pair ->
+        logger.info(
+            "Application ${ConsoleColors.BLUE}${pair.first.capitalize()}${ConsoleColors.RESET} started, " +
+                    "ID: ${ConsoleColors.GREEN}${pair.second}${ConsoleColors.RESET}"
+        )
+    }
 }

@@ -32,13 +32,16 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     val vertxVersion = "4.0.0"
     dependencies {
+        implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
         implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.4.2")
-        implementation(group = "io.vertx", name = "vertx-core", version = vertxVersion)
-        implementation(group = "io.vertx", name = "vertx-web", version = vertxVersion)
-        implementation(group = "io.vertx", name = "vertx-lang-kotlin", version = vertxVersion)
-        implementation(group = "io.vertx", name = "vertx-lang-kotlin-coroutines", version = vertxVersion)
-        implementation(group = "io.vertx", name = "vertx-config", version = vertxVersion)
-        implementation(group = "io.vertx", name = "vertx-opentracing", version = vertxVersion)
+        implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-jdk8", version = "1.4.2")
+        implementation(group = "io.vertx", name = "vertx-core")
+        implementation(group = "io.vertx", name = "vertx-web")
+        implementation(group = "io.vertx", name = "vertx-web-client")
+        implementation(group = "io.vertx", name = "vertx-lang-kotlin")
+        implementation(group = "io.vertx", name = "vertx-lang-kotlin-coroutines")
+        implementation(group = "io.vertx", name = "vertx-config")
+        implementation(group = "io.vertx", name = "vertx-opentracing")
         implementation(group = "org.apache.logging.log4j", name = "log4j-api", version = "2.14.0")
         implementation(group = "org.apache.logging.log4j", name = "log4j-core", version = "2.14.0")
     }

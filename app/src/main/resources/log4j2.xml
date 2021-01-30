@@ -2,13 +2,16 @@
 <Configuration status="info" name="App" packages="">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%highlight{[%d{HH:mm:ss.SSS}]}{INFO=yellow} [%t] %highlight{%-5level}{FATAL=white, ERROR=red, WARN=blue, INFO=blue, DEBUG=green, TRACE=white} %highlight{%logger{36}}{INFO=cyan} - %msg%n" disableAnsi="false" />
         </Console>
         <Async name="Async">
             <AppenderRef ref="Console"/>
         </Async>
     </Appenders>
     <Loggers>
+        <!--<AsyncLogger name="com.github.vincentfree" level="info" includeLocation="false">
+            <AppenderRef ref="Async"/>
+        </AsyncLogger>-->
         <Root level="info">
             <AppenderRef ref="Async"/>
         </Root>
