@@ -3,6 +3,7 @@ package com.github.vincentfree.verticles
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.vincentfree.util.Addresses
 import io.vertx.core.Future
+import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -22,6 +23,7 @@ class CacheVerticle : CoroutineVerticle() {
         cacheRecord()
         getRecord()
         getAllRecords()
+        getByUrl()
         super.start()
     }
 
@@ -71,14 +73,15 @@ class CacheVerticle : CoroutineVerticle() {
     }
 
     private fun getByUrl() {
-        bus.consumer<JsonArray>(Addresses.byURL).handler { msg ->
-            val array = msg.body()
+        bus.consumer<String>(Addresses.byURL).handler { msg ->
+            val url = msg.body()
             launch(vertx.dispatcher()) {
                 val res = cache.asMap().asSequence().asFlow()
                     .map { it.value.await() }
-                    .filter { array.contains(it.getString("url"))  }
-                    .fold(JsonArray()) { acc, value -> acc.add(value) }
-                msg.reply(res)
+                    .filter { url == it.getString("url") }
+                    .firstOrNull()
+                res?.let { msg.reply(it, DeliveryOptions().addHeader("status", "success")) }
+                    ?: msg.reply(JsonObject(), DeliveryOptions().addHeader("status", "empty"))
             }
         }
     }
